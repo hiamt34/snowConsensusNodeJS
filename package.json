@@ -1,0 +1,22 @@
+{
+  "name": "snowConsensus",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha src/test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "assert": "^2.1.0",
+    "uuid": "^11.0.3"
+  },
+  "devDependencies": {
+    "mocha": "^10.8.2"
+  }
+}
