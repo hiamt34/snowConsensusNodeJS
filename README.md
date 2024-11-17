@@ -52,6 +52,14 @@ node src/worker.js
 
 Lệnh này sẽ tạo ra 10 worker thread, mỗi thread chạy 20 node, tổng cộng có 200 node tham gia vào quá trình đồng thuận Snow.
 
+### Chạy test ứng dụng
+
+Để chạy test
+
+```bash
+npm run test
+```
+
 ## Tổng Quan Dự Án
 
 ### Thuật Toán Snow Consensus
