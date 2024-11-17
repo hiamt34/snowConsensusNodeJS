@@ -1,4 +1,10 @@
-const { K, CONFIDENCE_THRESHOLD, MAX_BROADCASTS } = require("./constants");
+const {
+  K,
+  CONFIDENCE_THRESHOLD,
+  MAX_BROADCASTS,
+  MAX_ROUNDS,
+  BETA,
+} = require("./constants");
 const Transaction = require("./transaction");
 
 class Node {
@@ -16,7 +22,7 @@ class Node {
       !this.transactions.has(transaction.txId)
     ) {
       this.transactions.add(transaction.txId);
-      setImmediate(() => this.broadcastTransaction(transaction));
+      this.broadcastTransaction(transaction);
     }
   }
 
@@ -24,9 +30,6 @@ class Node {
     if (!this.broadcastedTransactions.has(transaction.txId)) {
       this.broadcastedTransactions.add(transaction.txId);
       transaction.broadcastCount++;
-      console.log(
-        `Node ${this.nodeId} broadcasting transaction ${transaction.broadcastCount}: ${transaction.txId}`
-      );
       this.network.broadcastTransaction(transaction, this.nodeId);
     }
   }
@@ -48,15 +51,47 @@ class Node {
 
   startConsensus() {
     this.transactions.forEach((transactionId) => {
-      const confidence = this.queryValidators(new Transaction(transactionId));
-      if (confidence >= CONFIDENCE_THRESHOLD) {
+      let decisionMade = false;
+      let preference = true; // Assume initially that the node prefers accepting the transaction
+      let consecutiveSuccesses = 0;
+
+      for (let round = 0; round < MAX_ROUNDS && !decisionMade; round++) {
+        const confidence = this.queryValidators(new Transaction(transactionId));
+        const majorityPreference = confidence >= CONFIDENCE_THRESHOLD;
+
+        if (majorityPreference === preference) {
+          consecutiveSuccesses++;
+          if (consecutiveSuccesses >= BETA) {
+            decisionMade = true;
+            this.confidences[transactionId] = confidence;
+            if (preference) {
+              console.log(
+                `Node ${
+                  this.nodeId
+                } accepted transaction ${transactionId} after ${
+                  round + 1
+                } rounds with confidence ${confidence}`
+              );
+            } else {
+              console.log(
+                `Node ${
+                  this.nodeId
+                } rejected transaction ${transactionId} after ${
+                  round + 1
+                } rounds with confidence ${confidence}`
+              );
+            }
+          }
+        } else {
+          // Change preference and reset consecutive success counter
+          preference = majorityPreference;
+          consecutiveSuccesses = 0;
+        }
+      }
+
+      if (!decisionMade) {
         console.log(
-          `Node ${this.nodeId} accepted transaction ${transactionId} with confidence ${confidence}`
-        );
-        this.confidences[transactionId] = confidence;
-      } else {
-        console.log(
-          `Node ${this.nodeId} rejected transaction ${transactionId} with confidence ${confidence}`
+          `Node ${this.nodeId} could not finalize decision on transaction ${transactionId} after ${MAX_ROUNDS} rounds`
         );
       }
     });

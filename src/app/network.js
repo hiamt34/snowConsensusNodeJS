@@ -20,9 +20,9 @@ class Network {
 
   broadcastTransaction(transaction, senderId) {
     const targetNodes = this.sampleNodes(BROADCAST_COUNT);
-    targetNodes.forEach((node) => {
+    this.nodes.forEach((node) => {
       if (node.nodeId !== senderId) {
-        setImmediate(() => node.receiveTransaction(transaction));
+        node.receiveTransaction(transaction);
       }
     });
   }
