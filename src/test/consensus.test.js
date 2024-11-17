@@ -51,8 +51,7 @@ describe("Node Consensus Convergence", function () {
 
     const firstDecision = decisions[0];
     const allAgree = decisions.every((d) => d === firstDecision);
-    console.log(nodes);
-    console.log(decisions);
+
     assert.ok(
       allAgree,
       "All nodes should converge to the same decision for the transaction"
